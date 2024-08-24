@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"  # 将容器的端口 8080 映射到主机的端口 8080
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+    volumes:
+      - .:/app  # 将当前目录挂载到容器中的 /app 目录，便于开发时热重载
+    depends_on:
+      - db  # 确保在启动应用服务之前数据库已经启动
+
+  db:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"  # 将容器的 PostgreSQL 端口映射到主机的 5432 端口
+    volumes:
+      - db-data:/var/lib/postgresql/data  # 持久化数据库数据
+
+volumes:
+  db-data:
