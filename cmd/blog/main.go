@@ -1,23 +1,24 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"my-blog/internal/database"
+	"my-blog/internal/middleware"
+	"my-blog/internal/routers"
+)
 
 func main() {
-	r := gin.Default()
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "hello World",
-		})
-	})
-	r.GET("/hello", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "hello you",
-		})
-	})
-	r.GET("/world", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "where are you?",
-		})
-	})
-	r.Run() // listen and serve on 0.0.0.0:8080
+	// 初始化数据库连接
+	database.Init()
+
+	// 初始化 Gin 路由
+	r := routers.SetupRouter()
+
+	r.Static("/assets", "./web/assets") // 映射静态文件目录
+
+	// 设置安全标头中间件
+	expectedHost := "localhost:8080"
+	r.Use(middleware.SecurityHeaders(expectedHost))
+
+	// 启动服务器
+	r.Run(":8080")
 }
