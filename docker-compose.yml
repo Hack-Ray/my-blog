@@ -12,7 +12,9 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
     volumes:
-      - .:/app  # 将当前目录挂载到容器中的 /app 目录，便于开发时热重载
+      - .:/app
+      - ./tmp:/app/tmp
+
     depends_on:
       - db  # 确保在启动应用服务之前数据库已经启动
 
@@ -29,3 +31,4 @@ services:
 
 volumes:
   db-data:
+

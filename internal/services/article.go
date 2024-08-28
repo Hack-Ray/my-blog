@@ -54,3 +54,17 @@ func GetArticle(c *gin.Context) {
 		"date":    article.Date,
 	})
 }
+
+// GetArticles handles fetching a list of all articles
+func GetArticles(c *gin.Context) {
+	var articles []models.Article // 使用 models.Article 列表
+
+	// 使用 GORM 查询所有文章
+	if err := database.DB.Find(&articles).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch articles"})
+		return
+	}
+
+	// 返回文章列表
+	c.JSON(http.StatusOK, gin.H{"articles": articles})
+}

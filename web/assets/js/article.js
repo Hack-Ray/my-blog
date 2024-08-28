@@ -1,66 +1,113 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // 初始化 CodeMirror 编辑器
-    var editor = CodeMirror(document.getElementById('editor'), {
-        mode: 'markdown',
-        lineNumbers: true,
-        lineWrapping: true
-    });
+document.addEventListener('DOMContentLoaded', function () {
+    const postsPerPage = 10; // 每页显示的文章数量
+    let currentPage = 1; // 当前页码
+    let totalPages = 1; // 总页数
 
-    // 初始化空预览内容
-    document.getElementById('preview').innerHTML = marked.parse('');
+    // 显示文章列表并进行分页
+    function displayArticles(articles) {
+        const blogPostsContainer = document.getElementById('blog-posts');
+        blogPostsContainer.innerHTML = '';  // 清空现有内容
 
-    // 监听编辑器内容的变化，并实时渲染到右侧预览窗口
-    editor.on('change', function() {
-        var markdownContent = editor.getValue();
-        var htmlContent = marked.parse(markdownContent);  // 使用 marked.parse 解析 markdown
-        document.getElementById('preview').innerHTML = htmlContent;
-    });
+        // 计算当前页的文章起始和结束索引
+        const startIndex = (currentPage - 1) * postsPerPage;
+        const endIndex = Math.min(startIndex + postsPerPage, articles.length);
 
-    // 提交文章
-    document.getElementById('submit').addEventListener('click', function() {
-        var title = document.getElementById('title').value;
-        var content = editor.getValue();
-        var date = new Date().toISOString();  // 获取当前时间
-
-        if (title === '' || content === '') {
-            alert('Title and content cannot be empty.');
-            return;
+        // 遍历当前页的文章并渲染
+        for (let i = startIndex; i < endIndex; i++) {
+            const article = articles[i];
+            const articleElement = `
+                <div class="col-md-12 mb-4 post-card">
+                    <div class="card-body">
+                        <h4><a href="#" class="article-link" data-id="${article.id}">${article.title}</a></h4>
+                        <p>Created on: ${new Date(article.date).toLocaleString()}</p>
+                    </div>
+                </div>
+            `;
+            blogPostsContainer.innerHTML += articleElement;
         }
 
-        // 发送 AJAX 请求，将数据传递给后端 API
-        fetch('/articles', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                title: title,
-                content: content,
-                date: date
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert('Article submitted successfully!');
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to submit article.');
+        // 添加点击事件监听器
+        document.querySelectorAll('.article-link').forEach(link => {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                const articleId = this.getAttribute('data-id');
+                fetchArticleContent(articleId);
+            });
         });
-    });
 
-    // 获取文章并渲染 Markdown
-    const articleId = window.location.pathname.split('/').pop();  // 获取 URL 中的文章 ID
+        // 更新分页按钮
+        updatePaginationButtons(articles.length);
+    }
 
-    if (articleId) {
-        fetch('/articles/' + articleId)
+    // 更新分页按钮
+    function updatePaginationButtons(totalArticles) {
+        const paginationContainer = document.getElementById('pagination');
+        paginationContainer.innerHTML = '';  // 清空现有的分页按钮
+
+        totalPages = Math.ceil(totalArticles / postsPerPage);
+
+        for (let i = 1; i <= totalPages; i++) {
+            const activeClass = i === currentPage ? 'active' : '';
+            const pageButton = `
+                <li class="page-item ${activeClass}">
+                    <a class="page-link" href="#">${i}</a>
+                </li>
+            `;
+            paginationContainer.innerHTML += pageButton;
+        }
+
+        // 添加分页按钮点击事件
+        document.querySelectorAll('.page-link').forEach(link => {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                currentPage = parseInt(this.textContent);
+                fetchArticles(); // 切换页码时重新获取并渲染文章列表
+            });
+        });
+    }
+
+    // 获取并渲染文章列表
+    function fetchArticles() {
+        fetch('/articles')  // 替换为你的 API 路径
             .then(response => response.json())
             .then(data => {
-                // 将 Markdown 内容渲染为 HTML
-                document.getElementById('article-content').innerHTML = marked.parse(data.content);
+                displayArticles(data.articles);
+            })
+            .catch(error => {
+                console.error('Error fetching articles:', error);
+            });
+    }
+
+    // 查看文章内容的功能
+    function fetchArticleContent(articleId) {
+        fetch(`/articles/${articleId}`)
+            .then(response => response.json())
+            .then(data => {
+                const articleContentContainer = document.getElementById('article-content');
+                const articleHTML = `
+                    <div class="article">
+                        <h2>${data.title}</h2>
+                        <p>Created on: ${new Date(data.date).toLocaleString()}</p>
+                        <div>${marked.parse(data.content)}</div>
+                    </div>
+                `;
+                articleContentContainer.innerHTML = articleHTML;
+
+                // 高亮代码块
+                document.querySelectorAll('pre code').forEach(block => {
+                    hljs.highlightElement(block);
+                });
+
+                // 隐藏文章列表并显示文章内容
+                document.getElementById('blog-posts').style.display = 'none';
+                articleContentContainer.style.display = 'block';
+                document.querySelector('.pagination').style.display = 'none'; // 隐藏分页按钮
             })
             .catch(error => {
                 console.error('Error fetching the article:', error);
             });
     }
+
+    // 初始获取文章列表
+    fetchArticles();
 });

@@ -13,11 +13,13 @@ func main() {
 	// 初始化 Gin 路由
 	r := routers.SetupRouter()
 
-	r.Static("/assets", "./web/assets") // 映射静态文件目录
+	r.Static("/assets", "/app/web/assets")
 
-	// 设置安全标头中间件
-	expectedHost := "localhost:8080"
+	expectedHost := "http://localhost:8080/"
 	r.Use(middleware.SecurityHeaders(expectedHost))
+
+	// 允许特定的主机头，比如 0.0.0.0
+	r.SetTrustedProxies([]string{"0.0.0.0"})
 
 	// 启动服务器
 	r.Run(":8080")

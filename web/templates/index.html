@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Blog</title>
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <!-- 引入 highlight.js 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/default.min.css">
 </head>
 
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container">
             <a class="navbar-brand" href="#">My Blog</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -36,22 +36,31 @@
         </div>
     </nav>
 
-    <!-- Blog Posts -->
-    <div class="container mt-5">
+    <!-- Unified Container -->
+    <div class="container mt-5 pt-5" id="content-container">
         <div class="row" id="blog-posts">
             <!-- Blog posts will be dynamically inserted here -->
+        </div>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center" id="pagination">
+                <!-- Pagination buttons will be dynamically inserted here -->
+            </ul>
+        </nav>
+        <div id="article-content" class="pt-3" style="display: none;">
+            <!-- Article content will be dynamically inserted here -->
         </div>
     </div>
 
     <!-- Footer -->
-    <footer>
+    <footer class="bg-dark text-light text-center py-3">
         <p>&copy; 2024 My Blog. All rights reserved.</p>
     </footer>
 
-    <!-- Bootstrap 5 JS and dependencies -->
+    <!-- 引入 highlight.js 脚本 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JS -->
-    <script src="scripts.js"></script>
+    <script src="/assets/js/article.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </body>
 
 </html>
